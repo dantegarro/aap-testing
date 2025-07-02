@@ -1,6 +1,6 @@
 ---
         - name: Install and start Apache
-          hosts: localhost
+          hosts: web
           become: true
           tasks:
             - name: Ensure the httpd package is installed
