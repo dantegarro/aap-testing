@@ -3,7 +3,8 @@
   hosts: all
   tasks:
     - name: Registering system using activation key and organization ID
-      ansible.builtin.include_role:
+#      ansible.builtin.include_role:
+      ansible.builtin.import_role:
         name: redhat.rhel_system_roles.rhc
       vars:
         rhc_auth:
