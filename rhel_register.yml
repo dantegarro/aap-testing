@@ -1,14 +1,13 @@
 ---
-- name: Register RHEL with activation key (no D-Bus)
+- name: Register RHEL using rhc system role
   hosts: all
-  become: true
-  vars:
-    redhat_subscription_activation_key: "{{ activation_key }}"
-    redhat_subscription_org_id: "{{ organization_id }}"
-    redhat_subscription_state: present
-    redhat_subscription_use_dbus: false
-
   tasks:
-    - name: Register using redhat_subscription role
-      ansible.builtin.import_role:
-        name: redhat.rhel_system_roles.redhat_subscription
+    - name: Registering system using activation key and organization ID
+      ansible.builtin.include_role:
+        name: redhat.rhel_system_roles.rhc
+      vars:
+        rhc_auth:
+          activation_keys:
+            keys:
+              - "{{ activation_key }}"
+        rhc_organization: "{{ organization_id }}"
