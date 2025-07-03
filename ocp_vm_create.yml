@@ -105,11 +105,10 @@
                   - dataVolume:
                       name: "{{ vm_name }}"
                     name: rootdisk
-                  - name: cloudinitdisk
-                    cloudInitNoCloud:
+                  - cloudInitNoCloud:
                       userDataSecretRef:
                         name: cloudinit-userdata
-
+                    name: cloudinitdisk
     - name: Wait for system to become reachable over SSH
       ansible.builtin.wait_for_connection:
         delay: 60
