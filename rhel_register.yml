@@ -9,7 +9,7 @@
         name: rhc
         state: present
 
-    - name: Optional: Clean previous registration state
+    - name: Optional Clean previous registration state
       ansible.builtin.file:
         path: "{{ item }}"
         state: absent
