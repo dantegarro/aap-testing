@@ -7,7 +7,8 @@
     redhat_subscription_org_id: "{{ organization_id }}"
     redhat_subscription_state: present
     redhat_subscription_use_dbus: false
+
   tasks:
     - name: Register using redhat_subscription role
-      import_role:
+      ansible.builtin.import_role:
         name: redhat.rhel_system_roles.redhat_subscription
