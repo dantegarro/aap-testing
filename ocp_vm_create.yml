@@ -2,8 +2,29 @@
 - name: Create a VM in OpenShift Virtualization
   hosts: localhost
   gather_facts: false
-  
+  vars:
+    userdata_file: "/tmp/userdata.yaml"
+
   tasks:
+
+    - name: Generate cloud-init user data from template
+      ansible.builtin.template:
+        src: userdata.yaml.j2
+        dest: "{{ userdata_file }}"
+
+    - name: Create secret for cloud-init user data
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: cloudinit-userdata
+            namespace: "{{ ocp_namespace }}"
+          type: Opaque
+          data:
+            userdata: "{{ lookup('file', userdata_file) | b64encode }}"
+
     - name: Create a RHEL VM in OpenShift
       redhat.openshift.k8s:
         definition:
@@ -84,27 +105,12 @@
                   - dataVolume:
                       name: "{{ vm_name }}"
                     name: rootdisk
-                  - cloudInitNoCloud:
-                      userData: |
-                        #cloud-config
-                        users:
-                          - name: cloud-user
-                            sudo: ['ALL=(ALL) NOPASSWD: ALL']
-                            groups: wheel
-                            shell: /bin/bash
-                            ssh_authorized_keys:
-                              - "{{ ssh_public_key }}"
-                            passwd: "{{ vm_password }}"
-                            lock_passwd: false
-                        chpasswd:
-                          list: |
-                            cloud-user:{{ vm_password }}
-                          expire: False
-                        ssh_authorized_keys:
-                          - "{{ ssh_public_key }}"
-                    name: cloudinitdisk
+                  - name: cloudinitdisk
+                    cloudInitNoCloud:
+                      userDataSecretRef:
+                        name: cloudinit-userdata
 
-    - name: Wait for system to become reachable over
+    - name: Wait for system to become reachable over SSH
       ansible.builtin.wait_for_connection:
         delay: 60
         timeout: 180
