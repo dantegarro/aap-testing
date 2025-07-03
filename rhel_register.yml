@@ -11,3 +11,4 @@
             keys:
               - "{{ activation_key }}"
         rhc_organization: "{{ organization_id }}"
+         rhc_use_dbus: false
