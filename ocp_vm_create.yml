@@ -106,7 +106,7 @@
                       name: "{{ vm_name }}"
                     name: rootdisk
                   - cloudInitNoCloud:
-                      secretRef:
+                      userDataBase64:
                         name: cloudinit-userdata
                     name: cloudinitdisk
     - name: Wait for system to become reachable over SSH
