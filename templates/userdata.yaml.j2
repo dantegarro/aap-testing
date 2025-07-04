@@ -4,11 +4,10 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD: ALL']
     groups: wheel
     shell: /bin/bash
+    passwd: {{ vm_password | quote }}
+    lock_passwd: false    
     ssh_authorized_keys:
       - {{ ssh_public_key | quote }}
-    passwd: {{ vm_password | quote }}
-    lock_passwd: false
-
 chpasswd:
   list: |
     cloud-user:{{ vm_password }}
