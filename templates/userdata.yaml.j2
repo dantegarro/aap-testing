@@ -14,5 +14,4 @@ chpasswd:
     cloud-user:{{ vm_password }}
   expire: False
 
-ssh_authorized_keys:
-  - {{ ssh_public_key | quote }}
+ssh_pwauth: true
