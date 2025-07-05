@@ -23,7 +23,7 @@
             namespace: "{{ ocp_namespace }}"
           type: Opaque
           data:
-            userdata: "{{ lookup('file', userdata_file) | b64encode }}"
+            userdata_ref: "{{ lookup('file', userdata_file) | b64encode }}"
 
     - name: Create a RHEL VM in OpenShift
       redhat.openshift.k8s:
@@ -105,10 +105,11 @@
                   - dataVolume:
                       name: "{{ vm_name }}"
                     name: rootdisk
-                  - cloudInitNoCloud:
+                  - name: cloudinitdisk
+                    cloudInitNoCloud:
                       secretRef:
                         name: cloudinit-userdata
-                    name: cloudinitdisk
+                        key: userdata_ref                        
     - name: Wait for system to become reachable over SSH
       ansible.builtin.wait_for_connection:
         delay: 60
