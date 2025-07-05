@@ -108,7 +108,7 @@
                       name: "{{ vm_name }}"
                     name: rootdisk
                   - cloudInitNoCloud:
-                      secretRef:
+                      UserDataSecretRef:
                         name: cloudinit-userdata
                         key: userdata_ref
                     name: cloudinitdisk
