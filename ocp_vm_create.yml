@@ -24,7 +24,9 @@
           type: Opaque
           data:
             userdata_ref: "{{ lookup('file', userdata_file) | b64encode }}"
-
+    - name: Debug vm_password
+      ansible.builtin.debug:
+        var: vm_password
     - name: Create a RHEL VM in OpenShift
       redhat.openshift.k8s:
         definition:
