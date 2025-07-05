@@ -25,9 +25,9 @@
           data:
             userdata_ref: "{{ lookup('file', userdata_file) | b64encode }}"
 
-    - name: Create a RHEL VM in OpenShift
-      redhat.openshift.k8s:
-        definition:
+    - name: Define the KubeVirt VirtualMachine object
+      set_fact:
+        vm_definition:
           apiVersion: kubevirt.io/v1
           kind: VirtualMachine
           metadata:
@@ -49,23 +49,25 @@
                   name: "{{ vm_name }}"
                 spec:
                   sourceRef:
-                    kind: DataSource
+                    kind: CommonClusterPreference
                     name: rhel9
-                    namespace: openshift-virtualization-os-images
-                  storage:
+                    namespace: openshift
+                  pvc:
+                    accessModes:
+                      - ReadWriteOnce
                     resources:
                       requests:
-                        storage: 30Gi
+                        storage: 20Gi
+                    storageClassName: ocs-storagecluster-ceph-rbd
             template:
               metadata:
                 labels:
                   kubevirt.io/domain: "{{ vm_name }}"
                   kubevirt.io/size: small
               spec:
-                architecture: amd64
                 domain:
                   cpu:
-                    cores: 1
+                    cores: 2
                     sockets: 1
                     threads: 1
                   devices:
@@ -105,8 +107,25 @@
                   - dataVolume:
                       name: "{{ vm_name }}"
                     name: rootdisk
-                  - name: cloudinitdisk
-                    cloudInitNoCloud:                    
+                  - cloudInitNoCloud:
+                      secretRef:
+                        name: cloudinit-userdata
+                        key: userdata_ref
+                    name: cloudinitdisk
+
+    - name: Print the VM definition before applying
+      ansible.builtin.debug:
+        var: vm_definition
+        # Use to_nice_yaml for better readability, especially if you want to copy-paste
+        # the output and try oc apply -f - with it.
+        # Check if your Ansible version supports 'to_nice_yaml' or just use default.
+        # msg: "{{ vm_definition | to_nice_yaml }}"
+
+    - name: Create a RHEL VM in OpenShift # This is your original task
+      redhat.openshift.k8s:
+        definition: "{{ vm_definition }}" # Use the variable here
+      register: vm_creation_result
+
     - name: Wait for system to become reachable over SSH
       ansible.builtin.wait_for_connection:
         delay: 60
