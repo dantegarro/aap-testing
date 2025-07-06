@@ -106,7 +106,7 @@
                     name: rootdisk
                   - name: cloudinitdisk
                     cloudInitNoCloud:
-                      UserDataSecretRef:
+                      userDataSecretRef:
                         name: cloudinit-userdata
                         key: userData
     - name: Wait for system to become reachable over SSH
