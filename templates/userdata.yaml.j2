@@ -9,7 +9,6 @@ users:
       - {{ ssh_public_key | quote }}
     passwd: {{ vm_password | quote }}
     lock_passwd: false
-
 chpasswd:
   list: |
     cloud-user:{{ vm_password }}
