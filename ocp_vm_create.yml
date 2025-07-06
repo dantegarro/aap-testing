@@ -108,7 +108,7 @@
                     cloudInitNoCloud:
                       UserDataSecretRef:
                         name: cloudinit-userdata
-                        key: userdata_ref                        
+                        key: userdata_ref
     - name: Wait for system to become reachable over SSH
       ansible.builtin.wait_for_connection:
         delay: 60
