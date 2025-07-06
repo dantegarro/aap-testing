@@ -106,9 +106,8 @@
                     name: rootdisk
                   - name: cloudinitdisk
                     cloudInitNoCloud:
-                      userDataSecretRef:
-                        name: cloudinit-userdata
-                        key: userData
+                      userDataBase64: |
+                        IyMgdGVtcGxhdGU6IGppbmphCiNjbG91ZC1jb25maWcKdXNlcnM6CiAgLSBuYW1lOiBjbG91ZC11c2VyCiAgICBzdWRvOiBbJ0FMTD0oQUxMKSBOT1BBU1NXRDogQUxMJ10KICAgIGdyb3Vwczogd2hlZWwKICAgIHNoZWxsOiAvYmluL2Jhc2gKICAgIHNzaF9hdXRob3JpemVkX2tleXM6CiAgICAgIC0gJ3NzaC1yc2EgQUFBQUIzTnphQzF5YzJFQUFBQURBUUFCQUFBQ0FRQ0g0TU1ZT2ptRHBFUTN0M0hJN0JkOFE5YVNEcW9RZVlpV0dnYVRUTHBrVDNDUDl0Z2E2dlJzeElkdjNnWS9lNTM1eDc0RjI4amtmRk9LOUtLV3hKanlwOHVoVkVNVDNleXNQd0hCMDIydEVkbk1YK2k5Y1o5bVRybmxzaTBWMnNlalNqNVU3blZkUEFudEhCZEhDMXRKUmhpUWJEQktZY0VVY3FETDZHY051RkhTcmo0YmN0WElPbm5nVm9xREtDS1dBSXN5QUhRYmZDaThUSSt6NE5mS0VjdkpsZlNBSjBGWTlCVE8ybWpVSDI3QXd3ajJQVjcwaFFjVHdqZVo2S3FOQ3lxZFhjN05XQWtGUnl0NWRoZ2VDT2N3bGY1bzU2cUNFTzdBN1QwM2tZS0I5TjAyUjJvbjdZODdBQW5zTVE1VDBQcDEvMlZFRml6Smp6M3dYVkt3V01NdEIyajcxYm1SNUtzN1Vnb2p2TUY1bGMzaXhWcFhDQXJ5aHdSa0pwRWJORWtHTkdNUUMraGV3VVFhblJtVW02cE45dzRxbU41a1ZqY0V0RDd4bnVOQ05VeWZyM1NieWR6di9uU3FaQnVIdGJDV3ZsSFd5Tnl5Z2VuYTdpamZyZWY0SGJNSFc1aGlFMHZOaVg3SzBlMzJHT21Ua0dlNkM3eDN4UGl5cEhOWkR6NWpyZ0N5Z1UxMTV2OUc2eHQzVTdrWDZrWVhQdGVqSnhLc1hCZ3I1SjZ4azJZbnMxYzR4blFTU2poWktvVEl4eG13c3duMFRKdHlzbjBwZmF0bXhmSFJ1Q1JZeWVwMG9HakxiUXRIWHBkWUc0R0NOclNkVXdxaEU0KzlNWHI5RGJ4dkdTVHdnNEpFUDhRc2M1eWF2d2QzU0puNVZJU3FhbzVlclduM1d3PT0gcnNhLWtleS0yMDI1MDcwMycKICAgIHBhc3N3ZDogMTIzcXdlCiAgICBsb2NrX3Bhc3N3ZDogZmFsc2UKCmNocGFzc3dkOgogIGxpc3Q6IHwKICAgIGNsb3VkLXVzZXI6MTIzcXdlCiAgZXhwaXJlOiBGYWxzZQ==
     - name: Wait for system to become reachable over SSH
       ansible.builtin.wait_for_connection:
         delay: 60
