@@ -1,24 +1,7 @@
 ---
 - name: Register RHEL using rhc system role
   hosts: all
-  become: true
   tasks:
-
-    - name: Ensure rhc is installed
-      ansible.builtin.package:
-        name: rhc
-        state: present
-
-    - name: Optional Clean previous registration state
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - /etc/rhc/config.toml
-        - /etc/rhc/rhc.conf
-        - /etc/insights-client/.registered
-      ignore_errors: true
-
     - name: Registering system using activation key and organization ID
       ansible.builtin.include_role:
         name: redhat.rhel_system_roles.rhc
