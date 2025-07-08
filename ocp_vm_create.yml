@@ -2,7 +2,7 @@
 - name: Create a VM in OpenShift Virtualization
   hosts: localhost
   gather_facts: false
-  
+
   tasks:
     - name: Create a RHEL VM in OpenShift
       redhat.openshift.k8s:
@@ -75,6 +75,11 @@
                 networks:
                   - name: default
                     pod: {}
+                # NEW: Add port 22 to be reachable at the pod's IP
+                ports:
+                  - name: ssh
+                    port: 22
+                    protocol: TCP
                 terminationGracePeriodSeconds: 180
                 tolerations:
                   - effect: NoSchedule
@@ -103,6 +108,7 @@
                         ssh_authorized_keys:
                           - "{{ ssh_public_key }}"
                     name: cloudinitdisk
+
     - name: Wait for system to become reachable over
       ansible.builtin.wait_for_connection:
         delay: 60
