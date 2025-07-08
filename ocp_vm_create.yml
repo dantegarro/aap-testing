@@ -10,7 +10,7 @@
           apiVersion: kubevirt.io/v1
           kind: VirtualMachine
           metadata:
-            name: "VM1"
+            name: VM1
             namespace: "{{ ocp_namespace }}"
             labels:
               app: "{{ vm_name }}"
@@ -111,7 +111,7 @@
           apiVersion: kubevirt.io/v1
           kind: VirtualMachine
           metadata:
-            name: "VM2"
+            name: VM2
             namespace: "{{ ocp_namespace }}"
             labels:
               app: "{{ vm_name }}"
