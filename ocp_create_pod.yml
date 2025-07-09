@@ -30,14 +30,14 @@
                     drop:
                       - ALL
     - name: Wait for Pod to be running
-        kubernetes.core.k8s_info:
-          kind: Pod
-          namespace: dante-garro-dev
-          name: dante-testing
-        register: pod_info
-        until: pod_info.resources[0].status.phase == "Running"
-        retries: 10
-        delay: 3
+      kubernetes.core.k8s_info:
+        kind: Pod
+        namespace: dante-garro-dev
+        name: dante-testing
+      register: pod_info
+      until: pod_info.resources[0].status.phase == "Running"
+      retries: 10
+      delay: 3
 
     - name: Show Pod IP
       debug:
