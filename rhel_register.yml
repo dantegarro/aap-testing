@@ -1,6 +1,34 @@
 ---
 - name: Register RHEL using rhc system role
   hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure required variables are defined
+      fail:
+        msg: "Both 'activation_key' and 'organization_id' must be provided!"
+      when: activation_key is not defined or organization_id is not defined
+
+    - name: Print activation key and org ID for debug
+      debug:
+        msg: "Using activation_key='{{ activation_key }}' and organization_id='{{ organization_id }}'"
+
+    - name: Check external Red Hat connectivity
+      ansible.builtin.uri:
+        url: https://console.redhat.com
+        method: GET
+        status_code: 200
+        return_content: false
+      register: rhsm_reachable
+      failed_when: rhsm_reachable.status != 200
+      ignore_errors: true
+
+    - name: Warn if console.redhat.com is unreachable
+      debug:
+        msg: "WARNING: Cannot reach console.redhat.com — registration may fail"
+      when: rhsm_reachable.failed is defined and rhsm_reachable.failed
+
   tasks:
     - name: Registering system using activation key and organization ID
       ansible.builtin.include_role:
@@ -11,3 +39,14 @@
             keys:
               - "{{ activation_key }}"
         rhc_organization: "{{ organization_id }}"
+      register: rhc_result
+      ignore_errors: true  # Prevent Ansible from stopping the whole play
+
+    - name: Debug output of registration attempt
+      debug:
+        var: rhc_result
+
+    - name: Fail if registration did not succeed
+      fail:
+        msg: "Registration failed: see debug output above"
+      when: rhc_result is failed
