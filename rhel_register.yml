@@ -1,52 +1,55 @@
 ---
-- name: Register RHEL using rhc system role
+- name: Manual Red Hat registration test
   hosts: all
   become: true
-  gather_facts: true
+  gather_facts: false
+
+  vars:
+    activation_key: "{{ activation_key | default(omit) }}"
+    organization_id: "{{ organization_id | default(omit) }}"
 
   pre_tasks:
-    - name: Ensure required variables are defined
+    - name: Check that activation key is defined
       fail:
-        msg: "Both 'activation_key' and 'organization_id' must be provided!"
-      when: activation_key is not defined or organization_id is not defined
+        msg: "activation_key is not set"
+      when: activation_key is not defined
 
-    - name: Print activation key and org ID for debug
-      debug:
-        msg: "Using activation_key='{{ activation_key }}' and organization_id='{{ organization_id }}'"
+    - name: Check that organization ID is defined
+      fail:
+        msg: "organization_id is not set"
+      when: organization_id is not defined
 
-    - name: Check external Red Hat connectivity
+    - name: Test DNS connectivity to console.redhat.com
+      ansible.builtin.command: getent hosts console.redhat.com
+      register: dns_check
+      changed_when: false
+      failed_when: dns_check.rc != 0
+
+    - name: Test HTTPS connectivity to Red Hat
       ansible.builtin.uri:
         url: https://console.redhat.com
         method: GET
         status_code: 200
-        return_content: false
-      register: rhsm_reachable
-      failed_when: rhsm_reachable.status != 200
+      register: redhat_conn
+      failed_when: redhat_conn.status != 200
       ignore_errors: true
 
-    - name: Warn if console.redhat.com is unreachable
-      debug:
-        msg: "WARNING: Cannot reach console.redhat.com — registration may fail"
-      when: rhsm_reachable.failed is defined and rhsm_reachable.failed
-
   tasks:
-    - name: Registering system using activation key and organization ID
-      ansible.builtin.include_role:
-        name: redhat.rhel_system_roles.rhc
-      vars:
-        rhc_auth:
-          activation_keys:
-            keys:
-              - "{{ activation_key }}"
-        rhc_organization: "{{ organization_id }}"
-      register: rhc_result
-      ignore_errors: true  # Prevent Ansible from stopping the whole play
+    - name: Run rhc connect
+      ansible.builtin.command: >
+        rhc connect
+        --activation-key "{{ activation_key }}"
+        --organization "{{ organization_id }}"
+        --force
+      register: rhc_output
+      changed_when: "'Successfully connected' in rhc_output.stdout"
+      ignore_errors: true
 
-    - name: Debug output of registration attempt
+    - name: Show output of rhc connect
       debug:
-        var: rhc_result
+        var: rhc_output
 
-    - name: Fail if registration did not succeed
+    - name: Fail if registration was not successful
       fail:
-        msg: "Registration failed: see debug output above"
-      when: rhc_result is failed
+        msg: "rhc connect failed or did not return success"
+      when: rhc_output.rc != 0
