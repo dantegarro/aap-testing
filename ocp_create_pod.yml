@@ -10,7 +10,7 @@
           apiVersion: v1
           kind: Pod
           metadata:
-            name: dante_testing
+            name: dante-testing
             labels:
               app: httpd
             namespace: dante-garro-dev
