@@ -32,7 +32,7 @@
     - name: Wait for Pod to be running
         kubernetes.core.k8s_info:
           kind: Pod
-          namespace: mynamespace
+          namespace: dante-garro-dev
           name: dante-testing
         register: pod_info
         until: pod_info.resources[0].status.phase == "Running"
