@@ -4,17 +4,13 @@
   become: true
   gather_facts: false
 
-  vars:
-    activation_key: "{{ activation_key | default(omit) }}"
-    organization_id: "{{ organization_id | default(omit) }}"
-
   pre_tasks:
-    - name: Check that activation key is defined
+    - name: Fail if activation_key is not provided
       fail:
         msg: "activation_key is not set"
       when: activation_key is not defined
 
-    - name: Check that organization ID is defined
+    - name: Fail if organization_id is not provided
       fail:
         msg: "organization_id is not set"
       when: organization_id is not defined
