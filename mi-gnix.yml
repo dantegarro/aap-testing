@@ -49,11 +49,11 @@
           spec:
             initContainers:
               - name: init-site
-                image: busybox
-                command:
-                  - /bin/sh
-                  - -c
-                  - echo '{{ web_content | replace('\n', '') }}' > /mnt/www/index.html
+                image: alpine
+                command: ["/bin/sh", "-c"]
+                  args:
+                    - |
+                      echo '{{ web_content | to_json | from_json }}' > /mnt/www/index.html
                 volumeMounts:
                   - name: web-content
                     mountPath: /mnt/www
