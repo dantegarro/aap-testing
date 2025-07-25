@@ -6,9 +6,10 @@
     - community.kubernetes
 
   vars:
+    namespace: dante-garro-dev
     pvc_name: nginx-pvc
     pod_name: nginx-efs
-    storage_class: efs-sc  # <-- updated here
+    storage_class: efs-sc
     web_content: |
       <html>
         <head><title>Welcome</title></head>
@@ -22,6 +23,7 @@
     - name: Create PersistentVolumeClaim (EFS)
       k8s:
         state: present
+        namespace: "{{ namespace }}"
         definition:
           apiVersion: v1
           kind: PersistentVolumeClaim
@@ -29,7 +31,7 @@
             name: "{{ pvc_name }}"
           spec:
             accessModes:
-              - ReadWriteOnce
+              - ReadWriteMany
             resources:
               requests:
                 storage: 1Gi
@@ -38,6 +40,7 @@
     - name: Create Nginx pod with mounted PVC and init container to copy content
       k8s:
         state: present
+        namespace: "{{ namespace }}"
         definition:
           apiVersion: v1
           kind: Pod
@@ -50,7 +53,7 @@
                 command:
                   - /bin/sh
                   - -c
-                  - echo '{{ web_content | replace("\n", "") }}' > /mnt/www/index.html
+                  - echo '{{ web_content | replace('\n', '') }}' > /mnt/www/index.html
                 volumeMounts:
                   - name: web-content
                     mountPath: /mnt/www
