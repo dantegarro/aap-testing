@@ -66,9 +66,11 @@
         name: populate-efs
         namespace: "{{ namespace }}"
       register: job_info
-      until: job_info.resources[0].status.succeeded == 1
-      retries: 10
-      delay: 5
+      until: >
+        job_info.resources[0].status.conditions is defined and
+        job_info.resources[0].status.conditions | selectattr('type', 'equalto', 'Complete') | list | length > 0
+      retries: 15
+      delay: 4
 
     - name: Create Nginx Pod
       kubernetes.core.k8s:
