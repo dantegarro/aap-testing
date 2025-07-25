@@ -55,7 +55,6 @@
                   - name: web-content
                     persistentVolumeClaim:
                       claimName: "{{ pvc_name }}"
-                securityContext:
             backoffLimit: 2
 
     - name: Wait for Job to complete
