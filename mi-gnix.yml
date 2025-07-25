@@ -51,9 +51,9 @@
               - name: init-site
                 image: alpine
                 command: ["/bin/sh", "-c"]
-                  args:
-                    - |
-                      echo '{{ web_content | to_json | from_json }}' > /mnt/www/index.html
+                args:
+                  - |
+                    echo '{{ web_content | to_json | from_json }}' > /mnt/www/index.html
                 volumeMounts:
                   - name: web-content
                     mountPath: /mnt/www
