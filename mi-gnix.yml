@@ -1,27 +1,19 @@
----
-- name: Deploy Nginx with EFS PVC and a sample website
+- name: Deploy Nginx with EFS
   hosts: localhost
-  gather_facts: no
-  collections:
-    - community.kubernetes
-
+  gather_facts: false
   vars:
     namespace: dante-garro-dev
     pvc_name: nginx-pvc
-    pod_name: nginx-efs
-    storage_class: efs-sc
     web_content: |
       <html>
-        <head><title>Welcome</title></head>
-        <body>
-          <h1>Hello from OpenShift Nginx + EFS!</h1>
-        </body>
+      <head><title>Hello</title></head>
+      <body><h1>Hello from EFS!</h1></body>
       </html>
 
   tasks:
 
-    - name: Create PersistentVolumeClaim (EFS)
-      k8s:
+    - name: Create PVC
+      kubernetes.core.k8s:
         state: present
         namespace: "{{ namespace }}"
         definition:
@@ -30,33 +22,66 @@
           metadata:
             name: "{{ pvc_name }}"
           spec:
-            accessModes:
-              - ReadWriteMany
+            accessModes: [ReadWriteOnce]
             resources:
               requests:
                 storage: 1Gi
-            storageClassName: "{{ storage_class }}"
+            storageClassName: efs-sc
 
-    - name: Create Nginx pod with mounted PVC and init container to copy content
-      k8s:
+    - name: Create Job to populate PVC
+      kubernetes.core.k8s:
+        state: present
+        namespace: "{{ namespace }}"
+        definition:
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: populate-efs
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: writer
+                    image: alpine
+                    command: ["/bin/sh", "-c"]
+                    args:
+                      - |
+                        echo '{{ web_content | to_json | from_json }}' > /mnt/efs/index.html
+                    volumeMounts:
+                      - name: web-content
+                        mountPath: /mnt/efs
+                restartPolicy: Never
+                volumes:
+                  - name: web-content
+                    persistentVolumeClaim:
+                      claimName: "{{ pvc_name }}"
+                securityContext:
+                  fsGroup: 1000
+            backoffLimit: 2
+
+    - name: Wait for Job to complete
+      kubernetes.core.k8s_info:
+        api_version: batch/v1
+        kind: Job
+        name: populate-efs
+        namespace: "{{ namespace }}"
+      register: job_info
+      until: job_info.resources[0].status.succeeded == 1
+      retries: 10
+      delay: 5
+
+    - name: Create Nginx Pod
+      kubernetes.core.k8s:
         state: present
         namespace: "{{ namespace }}"
         definition:
           apiVersion: v1
           kind: Pod
           metadata:
-            name: "{{ pod_name }}"
+            name: nginx-efs
           spec:
-            initContainers:
-              - name: init-site
-                image: alpine
-                command: ["/bin/sh", "-c"]
-                args:
-                  - |
-                    echo '{{ web_content | to_json | from_json }}' > /mnt/www/index.html
-                volumeMounts:
-                  - name: web-content
-                    mountPath: /mnt/www
+            securityContext:
+              fsGroup: 1000
             containers:
               - name: nginx
                 image: nginx
