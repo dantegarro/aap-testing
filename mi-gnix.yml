@@ -8,7 +8,7 @@
   vars:
     pvc_name: nginx-pvc
     pod_name: nginx-efs
-    storage_class: aws-efs
+    storage_class: efs-sc  # <-- updated here
     web_content: |
       <html>
         <head><title>Welcome</title></head>
@@ -35,13 +35,6 @@
                 storage: 1Gi
             storageClassName: "{{ storage_class }}"
 
-    - name: Create init container script to write index.html
-      copy:
-        dest: ./init-script.sh
-        content: |
-          #!/bin/sh
-          echo '{{ web_content | replace("\n", "") }}' > /mnt/www/index.html
-
     - name: Create Nginx pod with mounted PVC and init container to copy content
       k8s:
         state: present
@@ -54,7 +47,10 @@
             initContainers:
               - name: init-site
                 image: busybox
-                command: ["/bin/sh", "-c", "echo '{{ web_content | replace('\n', '') }}' > /mnt/www/index.html"]
+                command:
+                  - /bin/sh
+                  - -c
+                  - echo '{{ web_content | replace("\n", "") }}' > /mnt/www/index.html
                 volumeMounts:
                   - name: web-content
                     mountPath: /mnt/www
