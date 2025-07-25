@@ -56,7 +56,6 @@
                     persistentVolumeClaim:
                       claimName: "{{ pvc_name }}"
                 securityContext:
-                  fsGroup: 1000
             backoffLimit: 2
 
     - name: Wait for Job to complete
